@@ -3,8 +3,11 @@
 - alcasar-mail-install.sh
 - alcasar-mail-uninstall.sh
 - alcasar-mail-wld-bld.sh
-Ces fichiers sont a mettre dans le dossier /usr/local/bin pour être executés en tant que commande depuis la cli.
+Ces fichiers sont à mettre dans le dossier /usr/local/bin pour être executés en tant que commande depuis la cli.
 
+- inscription.php
+- inscription_traitement.php
+Ces fichiers sont à mettre dans le dossier /var/www/html.
 
 - alcasar-mail-install.sh :
 
@@ -78,3 +81,10 @@ S'il est lancé en mode interactif il éxecute à la fin alcasar-mail-wld-bld.sh
 - alcasar-mail-uninstall.sh :
 
   il remet la conf à zéro comme avant l'install.
+
+
+- inscription.php
+  La partie front de la page d'inscription des utilisateurs, si WLD ou BLD sont configurées alors les inscriptions seront limitées, filtrées.
+  
+- inscription_traitement.php
+  La partie back de la page d'inscription.
