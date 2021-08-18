@@ -1,32 +1,33 @@
 #!/bin/bash
 
 ##################################################################################################################
-##																												##
-##					ALCASAR SERVICE MAIL INSTALL / WHITE LIST/BLACK LIST DOMAIN									##
-##																												##	
-##	Script by K@M3L 1101130512.1901090409 & T3RRY LaPlateforme_.												##
-## 	V 1.0 June 2021.																							##
-##  This script configure the mail service, WHITE/BLACK list domain.											##
-##																												##
-##	- WHITE LIST WLD :																							##
-##																												##
-##    La liste blanche limite les inscriptions utilisateurs a un, ou plusieurs domaines							##
-##	  configurés depuis ce script, ou depuis l'ACC.																##
-##	  Les utilisateurs utilsant d'autres domaines ne pourant pas s'inscrire, ni utiliser ALCASAR.				##
-##    EX: la white liste cotient le domaine "localdomain.com",													##
-##	  il n'aura que les utilisateur avec un mail "XXXX@localdomain.com" qui peuvent s'inscrire					##
-##																												##
-##  - Black LIST BLD :																							##
-##    La liste noire empêche les inscriptions utilisateurs d'un, ou plusieurs domaines							##
-##	  configurés depuis ce script, ou depuis l'ACC.																##
-##	  Les utilisateurs utilsant le/les domaines de la BLK ne pourant pas s'inscrire, ni utiliser ALCASAR.		##
-##    EX: la black liste cotient le domaine "gmail.com",														##
-##	  il n'aura que les utilisateur avec un mail different de "XXXX@gmail.com" qui peuvent s'inscrire			##
-##																												##
-##  																											##
-##  ATTENTION :	ON NE DOIT UTILISER QUE L'UNE DES DEUX,															##
-##		si on utilise la WLD tout les autres domaine sont automatiquement bannit.								##
-##																												##
+##														##
+##			ALCASAR SERVICE MAIL INSTALL / WHITE LIST/BLACK LIST DOMAIN				##
+##														##
+##	Script by K@M3L 1101130512.1901090409 & T3RRY LaPlateforme_.						##
+## 	V 1.0 June 2021.											##
+##  This script configure the mail service, WHITE/BLACK list domain.						##
+##														##
+##	- WHITE LIST WLD :											##
+##														##
+##    La liste blanche limite les inscriptions utilisateurs a un, ou plusieurs domaines				##
+##	  configurés depuis ce script, ou depuis l'ACC.								##
+##	  Les utilisateurs utilsant d'autres domaines ne pourant pas s'inscrire, ni utiliser ALCASAR.		##
+##    EX: la white liste cotient le domaine "localdomain.com",							##
+##	  il n'aura que les utilisateur avec un mail "XXXX@localdomain.com" qui peuvent s'inscrire		##
+##														##
+##  - Black LIST BLD :												##
+##    La liste noire empêche les inscriptions utilisateurs d'un, ou plusieurs domaines				##
+##	  configurés depuis ce script, ou depuis l'ACC.								##
+##	  Les utilisateurs utilsant le/les domaines de la BLK ne pourant pas s'inscrire, ni utiliser ALCASAR.	##
+##    EX: la black liste cotient le domaine "gmail.com",							##
+##	  il n'aura que les utilisateur avec un mail different de "XXXX@gmail.com" qui peuvent s'inscrire	##
+##														##
+##														##
+##  ATTENTION :	ON NE DOIT UTILISER QUE L'UNE DES DEUX,								##
+##	si on utilise la WLD tous les autres domaines sont automatiquement bannis.				##
+##	si on utilise la BLD tous les autres domaines sont automatiquement autorisés.				##
+##														##
 ##################################################################################################################
 
 
@@ -59,8 +60,9 @@ fi
 
 # test if the user is root
 if [ "$EUID" -ne 0 ]
-  then echo -e "\e[5m\nPlease run as root\n\e[m"
-  exit
+then
+	echo -e "\e[5m\nPlease run as root\n\e[m"
+	exit 1
 fi
 
 # Header de l'installations
@@ -82,27 +84,19 @@ declare -a whiteDomain
 read -p "$wldMsg" response1
 
 PTN='^[oOyY]?$'
-cpt=0
+
 while [[ $response1 =~ $PTN ]]
 do
 	read -p "$wldNewD" domain
 	read -p "$addOther" response1
-	
-	if [ $cpt -eq 0 ]
-	then
-		whiteDomain+=("$domain")
-	else
-		whiteDomain+=(" $domain")
-	fi
 
-	let cpt++
+	whiteDomain+=("$domain")
 done
 
 if [ ! -z  $whiteDomain ]
 then
-	whiteDomain=$(IFS=", "; echo "${whiteDomain[*]}")
 	sed -i '/whiteDomain/d' /usr/local/etc/alcasar-mail.conf
-	echo "whiteDomain=${whiteDomain}" >> /usr/local/etc/alcasar-mail.conf
+	echo "whiteDomain=${whiteDomain[*]}" >> /usr/local/etc/alcasar-mail.conf
 fi
 
 
@@ -112,28 +106,18 @@ declare -a blackDomain
 
 read -p "$bldMsg" response2
 
-cpt=0
-
 while [[ $response2 =~ $PTN ]]
 do
 	read -p "$bldNewD" domain
 	read -p "$addOther" response2
 
-	if [ $cpt -eq 0 ]
-	then
-		blackDomain+=("$domain")
-	else
-		blackDomain+=(" $domain")
-	fi
-
-	let cpt++
+	blackDomain+=("$domain")
 done
 
 if [ ! -z  $blackDomain ]
 then
-	blackDomain=$(IFS=", "; echo "${blackDomain[*]}")
 	sed -i '/blackDomain/d' /usr/local/etc/alcasar-mail.conf
-	echo "blackDomain=${blackDomain}" >> /usr/local/etc/alcasar-mail.conf
+	echo "blackDomain=${blackDomain[*]}" >> /usr/local/etc/alcasar-mail.conf
 fi
 
 exit 0
