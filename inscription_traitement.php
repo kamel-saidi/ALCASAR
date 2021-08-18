@@ -350,7 +350,7 @@ if(isset($_POST['Fmail'])){
 
 						$header = "From: $from\n";
 						$header .= "MIME-Version: 1.0\n";
-                        $header .= "Content-type: text/html; charset=utf-8\n";
+						$header .= "Content-type: text/html; charset=utf-8\n";
 						mail($to, $subject, $message, $header);
 		
 					}
