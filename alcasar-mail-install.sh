@@ -1,49 +1,51 @@
 #!/bin/bash
 
 ##############################################################################################################################
-##																															##
-##					ALCASAR SERVICE MAIL INSTALL																			##
-##																															##	
-##	Script by K@M3L 1101130512.1901090409 & T3RRY LaPlateforme_.															##
-## 	V 1.0 June 2021.																										##
-##  This script configure the mail service, install postfix if not installed.												##
-##   - il y a trois choix de configuration:																					##
-##    -1 service mail autonome, il faut une ip publique d'un nom de domaine enregistré										##
-##  	pour la résolution DNS MX du domaine.																				##
-##    -2 service mail qui dépend, relaye les couriels sortant un un autre serveur mail										##
-##  	(local, distant, ... ) dans ce cas contrairement aux 2 autres,														##
-##  	Iptables n'autorise la communication qu'avec ce serveur mail.														##
-##    -3 le service mail utilise une adresse mail pour envoyer les couriels													##
-##  	comme n'importe quel logciel de messagerie.																			##
-##  																														##
-##  l'interactvité avec l'administrateur à l'installation a pour but de														##
-##   - récupérer des paramètres de configurations POSTFIX.																	##
-##   - récupéter des paramètres de l'email pour le cas trois.																##
-##   - récuperer les paramètres pour Iptables.																				##
-##   - configurer la limitattion des inscriptions utilisateurs à un ou quelques domaines WLD white list domains				##
-##   - configurer le bannisement d'un ou quelques domaines  lors des inscriptions utilisateurs BLD Black list domains		##
-##																															##
-##  Ces paramètres de configurations peuvent être envoyer au script sous forme d'options et arguments:						##
-##   - -1 -2 -3 pour pour initialiser la varible qui détermine la configuration voir plus haut, elle est très importante.	##
-##	 - -1 postfix est autonome, si on mets cette option veuillez ne pas rajouter d'autres options sauf -a, -w, -b			##
-##   - -s pour le SMTP.																										##
-##   - -p pour le port.																										##
+##															    ##
+##				    ALCASAR SERVICE MAIL INSTALL							    ##
+##															    ##
+##	Script by K@M3L 1101130512.1901090409 & T3RRY LaPlateforme_.							    ##
+##	V 1.0 June 2021.							    					    ##
+##  This script configure the mail service, install postfix if not installed.						    ##
+##															    ##
+##  l'interactvité avec l'administrateur à l'installation a pour but de :						    ##
+##   - récupérer des paramètres de configurations POSTFIX.								    ##
+##   - récupéter des paramètres de l'email pour le cas trois.								    ##
+##   - récuperer les paramètres pour Iptables.										    ##
+##   - configurer la limitattion des inscriptions utilisateurs à un ou quelques domaines WLD white list domains.	    ##
+##   - configurer le bannisement d'un ou quelques domaines  lors des inscriptions utilisateurs BLD Black list domains.	    ##
+##															    ##
+##   - il y a trois choix de configuration:										    ##
+##    -1 service mail autonome, il faut une ip publique d'un nom de domaine enregistré					    ##
+##  	pour la résolution DNS MX du domaine.										    ##
+##    -2 service mail qui dépend, relaye les couriels sortant un un autre serveur mail					    ##
+##  	(local, distant, ... ) dans ce cas contrairement aux 2 autres,							    ##
+##  	Iptables n'autorise la communication qu'avec ce serveur mail.							    ##
+##    -3 le service mail utilise une adresse mail pour envoyer les couriels						    ##
+##  	comme n'importe quel logciel de messagerie.									    ##
+##															    ##
+##  Ces paramètres de configurations peuvent être envoyer au script sous forme d'options et arguments :			    ##
+##   - -1 -2 -3 pour pour initialiser la varible qui détermine la configuration voir plus haut, elle est très importante.   ##
+##   - -1 postfix est autonome, si on mets cette option veuillez ne pas rajouter d'autres options sauf -a, -w, -b.	    ##
+##   - -s pour le SMTP FQDN ou IP.											    ##
+##   - -p pour le port.													    ##
 ##   - -r pour l'ip du serveur SMTP dans le cas relay, 0.0.0.0/0 pour les autres cas, ou le cas d'un SMTP avec ip dynamique.##
-##   - -m pour le mail dans le cas 3.																						##
-##   - -o pour le mot de passe du compte mail dans le cas 3.																##
-##   - -w pour la WLD, l'argument est un tableau au format 'domain1.com, domain2.fr, ...'									##
-##   - -b pour la BLD, l'argument est un tableau au format 'domain1, domain2, ...'											##
-##   - -a pour le mail de l'admin, reception des log, et mail lors de nouvelle inscription									##
-##																															##
-##	ex alcasar-mail-install.sh -3 -s "smtp.gmail.com" -p 587 -m mail@gmail.com -o psswd -w 'domain1.com, domain2.com' 		##
-##		-																													##
+##   - -m pour le mail dans le cas 3.											    ##
+##   - -o pour le mot de passe du compte mail dans le cas 3. Attention si commande tapée le passe est entré en clair.	    ##
+##   - -w pour la WLD, l'argument est un tableau au format 'domain1.com domain2.fr ...'.				    ##
+##   - -b pour la BLD, l'argument est un tableau au format 'domain1 domain2 ...'.					    ##
+##   - -a pour le mail de l'admin, reception des log, et mail lors de nouvelle inscription.				    ##
+##															    ##
+##	ex : alcasar-mail-install.sh -3 -s "smtp.gmail.com" -p 587 -m mail@gmail.com -o psswd -w 'domain1.com, domain2.com'.##
+##															    ##
 ##############################################################################################################################
 
 
 # test if the user is root
 if [ "$EUID" -ne 0 ]
-  then echo -e "\n\e[5mPlease run as root\n\e[m"
-  exit
+then
+	echo -e "\n\e[5mPlease run as root\n\e[m"
+	exit
 fi
 
 # si il y a des options et des arguments on récupére les paramètres de configuration sans interagir avec l'admin
@@ -51,7 +53,6 @@ if [[ ${#} -ne 0 ]]
 then
 	while getopts ":s:p:r:m:o:a:w:b:123" option
 	do
-		echo "getopts a trouvé l'option $option"
 		case $option in
 			1)
 				testConf=1
@@ -97,39 +98,39 @@ then
 		esac
 	done
 	
-# si il n'y a des options et des arguments on récupére les paramètres de configuration en posant des questions a l'admin
+# s'il n'y a pas des options et des arguments on récupére les paramètres de configuration en posant des questions a l'admin
 else
 
 	Lang=`echo $LANG|cut -c 1-2`
 
 	# teste de la langue et déclaration des variables des messages affichés à l'écran en Français et Anglais
 	if [ $Lang == "fr" ]
-		then
-			header_title="	                 Instalation du service de messagerie : \n\n"
-			header_msg1=" ce service est indispensable si vous souhaitez envoyer les logs par mail, ou"
-			header_msg2=" pour l'envoi des emails d'inscription et reset de mot de passe utilisateur.\n"
-			header_msg3=" Il faut un nom de domaine enregistré avec SPF, DKIM, DMARc (ce service sera autonome),"
-			header_msg4=" ou un serveur mail fonctionnel dans votre domaine (en local, cloud, relais SMTP, ...),"
-			header_msg5=" ou un compte mail.\n"
-			header_msg6=" vous serez peut être obligé de configurer votre Firewall, routeur, boxe, ..."
-			header_msg7=" ou chez votre FAI pour laisser passer le traffic SMTP. \n\n"
-			msgInstall1="Si vous n'avez pas de paramètres de votre serveur mail, ou un comptre mail veuillez répondre N/n (non)."
-			msgInstall2="Vous pouvez réaliser l'installation à n'importe quel moment depuis la CLI 'alcasar-mail-install.sh',"
-			msgInstall3="ou '/usr/local/bin/alcasar-mail-install.sh', ou depuis l'ACC.\n"
-			msgInstallConfirm="voulez vous installer le service des emails (O/n)? : "
-		else
-			header_title=" 	                Mail service install : \n\n"
-			header_msg1=" This service is essential if you want to send the logs by email, "
-			header_msg2=" or for sending registration emails and user password reset."
-			header_msg3=" You need a domain name registered with SPF, DKIM, DMARc (this service will be autonomous ),"
-			header_msg4=" or a functional mail server in your domain (local, cloud, relay SMTP, ...),"
-			header_msg5=" or a simpl mail account.\n"
-			header_msg6=" you may have to configure your Firewall, router, boxing, ... ."
-			header_msg7=" or at your ISP to let SMTP traffic pass.\n\n"
-			msgInstall1="If you d'ont have the parameters of your mail server, or a mail account, please answer N/n (no)."
-			msgInstall2="you can do this install any time from the cli 'alcasar-mail-install.sh',"
-			msgInstall3="or '/usr/local/bin/alcasar-mail-install.sh', or from the ACC.\n"
-			msgInstallConfirm="Do you want to install this mail service (Y/n)? : "
+	then
+		header_title="	                 Instalation du service de messagerie : \n\n"
+		header_msg1=" ce service est indispensable si vous souhaitez envoyer les logs par mail, ou"
+		header_msg2=" pour l'envoi des emails d'inscription et reset de mot de passe utilisateur.\n"
+		header_msg3=" Il faut un nom de domaine enregistré avec SPF, DKIM, DMARc (ce service sera autonome),"
+		header_msg4=" ou un serveur mail fonctionnel dans votre domaine (en local, cloud, relais SMTP, ...),"
+		header_msg5=" ou un compte mail.\n"
+		header_msg6=" vous serez peut être obligé de configurer votre Firewall, routeur, boxe, ..."
+		header_msg7=" ou chez votre FAI pour laisser passer le traffic SMTP. \n\n"
+		msgInstall1="Si vous n'avez pas de paramètres de votre serveur mail, ou un comptre mail veuillez répondre N/n (non)."
+		msgInstall2="Vous pouvez réaliser l'installation à n'importe quel moment depuis la CLI 'alcasar-mail-install.sh',"
+		msgInstall3="ou '/usr/local/bin/alcasar-mail-install.sh', ou depuis l'ACC.\n"
+		msgInstallConfirm="voulez vous installer le service des emails (O/n)? : "
+	else
+		header_title=" 	                Mail service install : \n\n"
+		header_msg1=" This service is essential if you want to send the logs by email, "
+		header_msg2=" or for sending registration emails and user password reset."
+		header_msg3=" You need a domain name registered with SPF, DKIM, DMARc (this service will be autonomous ),"
+		header_msg4=" or a functional mail server in your domain (local, cloud, relay SMTP, ...),"
+		header_msg5=" or a simpl mail account.\n"
+		header_msg6=" you may have to configure your Firewall, router, boxing, ... ."
+		header_msg7=" or at your ISP to let SMTP traffic pass.\n\n"
+		msgInstall1="If you d'ont have the parameters of your mail server, or a mail account, please answer N/n (no)."
+		msgInstall2="you can do this install any time from the cli 'alcasar-mail-install.sh',"
+		msgInstall3="or '/usr/local/bin/alcasar-mail-install.sh', or from the ACC.\n"
+		msgInstallConfirm="Do you want to install this mail service (Y/n)? : "
 	fi
 
 	# Header de l'installations
@@ -234,7 +235,6 @@ choix   compte de messagerie    adresse de messagerie                   serveur 
 9)      Personalisez le serveur SMTP et le PORT
 "
 
-
 # smtp-mail.outlook.com (port 587)
 
 # on peut récupérer le SMTP depuis le mail mais pas sûr a 100%, le cas des mails de laplateforme.io, le smtp est Gmail 
@@ -288,7 +288,7 @@ choix   compte de messagerie    adresse de messagerie                   serveur 
 						;;
 
 						9)
-							read -p "Entrez le serveur SMTP au format smtp.XXX.XX  ( EX : smtp.gmail.com ) : " smtp
+							read -p "Entrez le serveur SMTP au format smtp.XXX.XX  ( EX : smtp.gmail.com ) ou son IP : " smtp
 							read -p "Entrez le PORT de votre serveur SMTP ( EX : 25, 465, 587 ) : " port
 						;;
 
@@ -296,7 +296,6 @@ choix   compte de messagerie    adresse de messagerie                   serveur 
 						;;
 					esac
 
-					smtpIP="0.0.0.0/0"
 					testConf=3
 				;;
 
@@ -315,14 +314,8 @@ choix   compte de messagerie    adresse de messagerie                   serveur 
 	esac
 fi
 
-if [ ! -z $testConf ] && [ $testConf -eq 1 ]
-then
-	smtpIP="0.0.0.0/0"
-	port=25
-fi
 
 # partie de paramètrage, commune avec les options et l'intéraction avec l'admin
-
 if [ ! -z $testConf ]
 then
 
@@ -346,41 +339,37 @@ then
 		cp -f /etc/postfix/main.cf.origin  /etc/postfix/main.cf
 	fi				
 
-	#ajout de la configuration dans le fichier de configuration
+	#ajout de la configuration dans le fichier de configuration de postfix
 
 	echo "myhostname = `hostname`" >> /etc/postfix/main.cf
-fi
-			
-if [ ! -z $testConf ] && [ $testConf -ne 1 ]
-then
-	echo "relayhost = [${smtp}]:${port}" >> /etc/postfix/main.cf
-fi
 
-if [ ! -z $testConf ] && [ $testConf -eq 3 ]
-then
+	# si la varibale est vide, on l'initialise à tout les relais, si elle passe par optio -r elle aura sa valeur	
+	[ -z $smtpIP ] && smtpIP="0.0.0.0/0"
 
-	#tester si le module d'authentification SASL est présent sinon l'installé 
-	rpm -q cyrus-sasl >> /dev/null 2>&1
-
-	if [ $? -eq 1 ]
-	then 
-		dnf install -y cyrus-sasl
-	fi
-
-	# si le rrépértoir n'existe pas on le crée
-	if [ ! -d /etc/postfix/sasl ]
+	[ $testConf -eq 1 ] && port=25
+		
+	[ $testConf -ne 1 ] && echo "relayhost = [${smtp}]:${port}" >> /etc/postfix/main.cf
+	
+	if [ $testConf -eq 3 ]
 	then
-		mkdir /etc/postfix/sasl
-	fi			
+        	saslPath="/etc/postfix/sasl"
 
-	# création de la db du password via SASL
-	echo "[${smtp}]:$port $mailAddr:$pswd2" > /etc/postfix/sasl/sasl_passwd
+		#tester si le module d'authentification SASL est présent sinon l'installé 
+		rpm -q cyrus-sasl >> /dev/null 2>&1
 
-	postmap /etc/postfix/sasl/sasl_passwd
+		[ $? -eq 1 ] && dnf install -y cyrus-sasl
+		
+		# si le rrépértoir n'existe pas on le crée
+		[ -d $saslPath ] || mkdir $saslPath
 
-	#protection des fichiers qui contiennent la conf du mail, et le password
-	chown root:root /etc/postfix/sasl/sasl_passwd*
-	chmod 0600 /etc/postfix/sasl/sasl_passwd*
+		# création de la db du password via SASL
+		echo "[${smtp}]:$port $mailAddr:$pswd2" > ${saslPath}/sasl_passwd
+
+		postmap ${saslPath}/sasl_passwd
+
+		#protection des fichiers qui contiennent la conf du mail, et le password
+		chown root:root ${saslPath}/sasl_passwd*
+		chmod 0600 ${saslPath}/sasl_passwd*
 
 cat << EOT >> /etc/postfix/main.cf
 
@@ -389,13 +378,11 @@ smtp_sasl_auth_enable = yes
 # Disallow methods that allow anonymous authentication
 smtp_sasl_security_options = noanonymous
 # Location of sasl_passwd
-smtp_sasl_password_maps = hash:/etc/postfix/sasl/sasl_passwd
+smtp_sasl_password_maps = hash:${saslPath}/sasl_passwd
 
 EOT
-fi
+	fi
 
-if [ ! -z $testConf ]
-then
 	systemctl restart postfix
 
 	# améliorer le code pour qu'il soit plus fléxible, faire des regex pour l'ip déjà présente, ainsi que le port
@@ -415,15 +402,15 @@ then
 	chmod 700 /usr/local/bin/alcasar-iptables.sh
 
 	/usr/local/bin/alcasar-iptables.sh
-			
+
 	#récupération du mail d'administration pour recevoir les alertes inscription, et les log hébdomadaire
-	echo "Le mail de l'administrateur sert à recevoir des mail lors d'une inscription utilisateur, et les log hébdo"
-	read -p "veuillez saisir l'email d'aministration : " adminMail
+	# Si l'admin a lancé l'install en mode interactif 
+	if [ ! -z $response ]
+	then
+		echo "Le mail de l'administrateur sert à recevoir des emails lors d'une inscription utilisateur, et l'archive des logs hébdo"
+		read -p "veuillez saisir l'email d'aministration (optionnel): " adminMail
+	fi		
 	
-	# pas besoin on va le lire depuis le fichier de conf mail.conf, a delete
-#	sed -i -e "/\$adminMail = / s/\$adminMail = .*/\$adminMail = ${adminMail};/" /var/www/html/inscription_register.php
-
-
 # voir si on a besoin de faire un backup si ce fichier existe déjà
 # il faut ajouter des conditions pour ne valider que les variables initiaisées
 cat << EOT > /usr/local/etc/alcasar-mail.conf
@@ -439,38 +426,17 @@ smtpIP=${smtpIP}
 port=${port}
 EOT
 
-	if [ ! -z $smtp ]
-	then
-		echo "smtp=${smtp}" >> /usr/local/etc/alcasar-mail.conf
-	fi
-
-	if [ ! -z $mailAddr ]
-	then
-		echo "mailAddr=$mailAddr" >> /usr/local/etc/alcasar-mail.conf
-	fi
-
-	if [ ! -z $adminMail ]
-	then
-		echo "adminMail=$adminMail" >> /usr/local/etc/alcasar-mail.conf
-	fi
-
-
-	if [ ! -z $wld ]
-	then
-		echo "whiteDomain=${wld}" >> /usr/local/etc/alcasar-mail.conf
-	fi
-
-	if [ ! -z $bld ]
-	then
-		echo "blackDomain=${bld}" >> /usr/local/etc/alcasar-mail.conf
-	fi
-
+	[ -z $smtp ] || echo "smtp=${smtp}" >> /usr/local/etc/alcasar-mail.conf
+	
+	[ -z $mailAddr ] || echo "mailAddr=${mailAddr}" >> /usr/local/etc/alcasar-mail.conf
 
 fi
 
-# on substitu le mail dans le script d'envoi d'archive pour mettre le mail de l'admin admin@domain.com
-# v2 pas besoin, on va lire le fichier de conf et récuperer le mail admin, a delete
-#sed -i 's/admin\@domain.com/${adminMail}/g' /usr/local/bin/alcasar-mail-archive.sh
+[ -z $adminMail ] || echo "adminMail=${adminMail}" >> /usr/local/etc/alcasar-mail.conf
+
+[[ -z $wld ]] || echo "whiteDomain=${wld}" >> /usr/local/etc/alcasar-mail.conf
+[[ -z $bld ]] || echo "blackDomain=${bld}" >> /usr/local/etc/alcasar-mail.conf
+
 
 # on ajoute le cron weekly, lundi 5H45 aprés l'archivage chaque lundi à 5H35,
 # on peut poser la question a l'admin s'il veut l'activer avant, dans ce cas le mettre avec la condition pour laé WLD/BLD
@@ -482,10 +448,6 @@ fi
 # on peut appeler le script WLD/BLD en mode interactif, seulement si l'install est en mode interactif lui même,
 # il n'est pas lancé en mode options, si la WLD/BLD éxiste en options, elle sera injéctée dans le fichier de conf direct
 
-
-if [ ! -z $response ] && [[ $response =~ $PTN ]]			
-then
-	/usr/local/bin/alcasar-mail-wld-bld.sh
-fi
+[ -z $response ] || /usr/local/bin/alcasar-mail-wld-bld.sh
 
 exit 0
