@@ -100,9 +100,7 @@ if (is_file ($alcasarMailConf)){
 		}
 	}
 }
-var_dump($whiteDomain);
-var_dump($blackDomain); exit();
-//Traitement de l'inscription
+
 if(isset($_POST['Fmail'])){
 
 	extract($_POST);
