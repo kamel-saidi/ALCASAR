@@ -5,7 +5,7 @@
 ##				    ALCASAR SERVICE MAIL INSTALL							    ##
 ##															    ##
 ##	Script by K@M3L 1101130512.1901090409 & T3RRY LaPlateforme_.							    ##
-##	V 1.0 June 2021.							    					    ##
+## 	V 1.0 June 2021.												    ##
 ##  This script configure the mail service, install postfix if not installed.						    ##
 ##															    ##
 ##  l'interactvité avec l'administrateur à l'installation a pour but de :						    ##
@@ -432,10 +432,22 @@ EOT
 
 fi
 
-[ -z $adminMail ] || echo "adminMail=${adminMail}" >> /usr/local/etc/alcasar-mail.conf
+if [ ! -z $adminMail ]
+then
+	sed -i '/adminMail/d' /usr/local/etc/alcasar-mail.conf  2>/dev/null
+	echo "adminMail=${adminMail}" >> /usr/local/etc/alcasar-mail.conf
+fi
 
-[[ -z $wld ]] || echo "whiteDomain=${wld}" >> /usr/local/etc/alcasar-mail.conf
-[[ -z $bld ]] || echo "blackDomain=${bld}" >> /usr/local/etc/alcasar-mail.conf
+if [[ ! -z $wld ]]
+then
+	sed -i '/whiteDomain/d' /usr/local/etc/alcasar-mail.conf  2>/dev/null
+	echo "whiteDomain=${wld}" >> /usr/local/etc/alcasar-mail.conf
+fi
+if [[ ! -z $bld ]]
+then
+	sed -i '/blackDomain/d' /usr/local/etc/alcasar-mail.conf  2>/dev/null
+	echo "blackDomain=${bld}" >> /usr/local/etc/alcasar-mail.conf
+fi
 
 
 # on ajoute le cron weekly, lundi 5H45 aprés l'archivage chaque lundi à 5H35,
