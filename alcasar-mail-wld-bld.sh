@@ -93,9 +93,9 @@ do
 	whiteDomain+=("$domain")
 done
 
-if [ ! -z  $whiteDomain ]
+if [ ! -z $whiteDomain ]
 then
-	sed -i '/whiteDomain/d' /usr/local/etc/alcasar-mail.conf
+	sed -i '/whiteDomain/d' /usr/local/etc/alcasar-mail.conf 2>/dev/null
 	echo "whiteDomain=${whiteDomain[*]}" >> /usr/local/etc/alcasar-mail.conf
 fi
 
@@ -114,9 +114,9 @@ do
 	blackDomain+=("$domain")
 done
 
-if [ ! -z  $blackDomain ]
+if [ ! -z $blackDomain ]
 then
-	sed -i '/blackDomain/d' /usr/local/etc/alcasar-mail.conf
+	sed -i '/blackDomain/d' /usr/local/etc/alcasar-mail.conf 2>/dev/null
 	echo "blackDomain=${blackDomain[*]}" >> /usr/local/etc/alcasar-mail.conf
 fi
 
