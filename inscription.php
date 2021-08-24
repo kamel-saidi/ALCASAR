@@ -4,7 +4,7 @@
 *										*
 *			ALCASAR INSCRIPTION					*
 *										*
-*	By K@M3L 1101130512.1901090409 & T3RRY LaPlateforme_.			*
+*	By K@M3L 1101130512.1901090409 & T3RRY @ La Plateforme_			*
 *	V 1.0 June 2021.							*
 *										*
 *	Partie front de la page d'inscription des utilisateurs			*
@@ -100,7 +100,6 @@ $l_title = "Inscription";
 						type: "post",
 						url:  "inscription_traitement.php",
 						data: {
-
 							'Fmail' : Fmail,
 						},
 						beforeSend: function(){
@@ -109,11 +108,11 @@ $l_title = "Inscription";
 						success: function(data){
 							if (data.match("success")) {
 								status.html(data).fadeIn(400);
-								alert("Encore une dernière étape!\n\nUn mot de passe temporaire vient de vous être envoyé à l'adresse électronique indiquée lors de l'inscription.\nCette dernière \"" + Fmail + "\" est votre login. Veuillez changer votre mot de passe.\n\n(Pensez à vérifier vos spams ou courriers indésirables, si vous ne voyez pas ce mail dans votre boîte de réception).\n\nSi vous ne recevez pas le mail dans les 24 heures, utilisez le formulaire de réinitialisation, ou contactez votre administrateur.")
+								alert("Encore une dernière étape!\n\nUn mot de passe temporaire vient de vous être envoyé à votre adresse électronique.\n Veuillez changer votre mot de passe.\n\n(Pensez à vérifier vos spams ou courriers indésirables, si vous ne voyez pas ce mail dans votre boîte de réception).\n\nSi vous ne recevez pas le mail dans les 24 heures, utilisez le formulaire de réinitialisation, ou contactez votre administrateur.")
 								 document.location.href="index.php";
 							} else {
 							console.log(data);
-								alert("il y'a eu un problème avec votre inscription, ou l'envoi du mail d'activation.\n\nVeuillez renouveler votre inscription, utilisez le formulaire de réinitialisation, ou contactez votre administrateur.");
+								alert("Une erreur s'est produite.\n\nVeuillez renouveler votre inscription, utilisez le formulaire de réinitialisation, ou contactez votre administrateur.");
 								status.css("color", "red").html(data).fadeIn(400);
 							}
 						}

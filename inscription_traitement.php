@@ -46,7 +46,7 @@ if (false && /* Hide operator column */ $config['general_lib_type'] == 'sql' && 
 if (is_file("acc/manager/lib/sql/drivers/$config[sql_type]/functions.php"))
 	require("acc/manager/lib/sql/drivers/$config[sql_type]/functions.php");
 else{
-	echo "<b>Could not include SQL library</b><br>\n";
+	echo "<b>Could not include SQL library</b><br />\n";
 	exit();
 }
 
@@ -108,25 +108,25 @@ if(isset($_POST['Fmail'])){
 	$Fmail = htmlentities(strtolower(trim($Fmail)));
 	
 	if(!filter_var($Fmail, FILTER_VALIDATE_EMAIL)){  
-		echo "<b>Adresse email invalide !</b><br>\n";
+		echo "<b>L'adresse email est invalide</b><br />\n";
 		exit();
 	}
 	
-	//on récupere le nom de domain du mail@domain.com
+	// on récupère le nom de domaine du mail@domain.com
 	list($user, $domain) = explode('@', $Fmail);
 
-	// on vérifi si le domaine est dans la WLD, sinon on bloque
+	// on vérifie si le domaine est dans la WLD, sinon on bloque
 	if (!empty($whiteDomain)){
 		if (!in_array($domain, $whiteDomain)){
-			echo "ce domaine $domain n'est pas autorisé pour les inscriptions white";
+			echo "Le domaine $domain n'est pas autorisé";
 			exit();
 		}
 	}
 
-	// on vérifi si le domaine est dans la BLD, si c'est le cas on bloque
+	// on vérifie si le domaine est dans la BLD, si c'est le cas on bloque
 	if (!empty($blackDomain)){
 		if (in_array($domain, $blackDomain)){
-			echo "Ce domaine $domain n'est pas autorisé pour les inscriptions black";
+			echo "Le domaine $domain n'est pas autorisé";
 			exit();
 		}
 	}
@@ -157,9 +157,10 @@ if(isset($_POST['Fmail'])){
 
 
 	if($login_check > 0) {
-		echo "<b>L'adresse mail est déjà utilisé en tant que login.</b><br>\n";
+		//Adresse email utilisée en tant que login
+		echo "<b>L'adresse email est déjà utilisée.</b><br />\n";
 	} else if($email_check > 0) {
-		echo "<b>Cette adresse mail est déjà utilisée.</b><br>\n";
+		echo "<b>L'adresse mail est déjà utilisée.</b><br />\n";
 	} else {
 
 		$password = GenPassword();
@@ -184,7 +185,7 @@ if(isset($_POST['Fmail'])){
 				"INSERT INTO $config[sql_check_table] (attribute,value,username $text)
 				VALUES ('$config[sql_password_attribute]','$passwd','$login' $passwd_op);");
 				if (!$res || !da_sql_affected_rows($link,$res,$config)){
-					echo "<b>Unable to add user $login: " . da_sql_error($link,$config) . "</b><br>\n";
+					echo "<b>Erreur lors de la création de l'utilisateur $login: " . da_sql_error($link,$config) . "</b><br />\n";
 					$da_abort=1;
 				}
 
@@ -206,13 +207,14 @@ if(isset($_POST['Fmail'])){
 							('$login','$Fcn','$Fmail','$Fou','$Fhomephone','$Ftelephonenumber','$Fmobile');");
 
 							if (!$res || !da_sql_affected_rows($link,$res,$config))
-								echo "<b>Could not add user information in user info table: " . da_sql_error($link,$config) . "</b><br>\n";
+								// Erreur sql à supprimer : l'info ne devrait pas être communiquer au client.
+								echo "<b>Une erreur s'est produite lors de la création du compte : " . da_sql_error($link,$config) . "</b><br />\n";
 						}
 						else
-							echo "<b>Cet usager existe d&eacute;j&agrave; dans la table 'info'</b><br>\n";
+							echo "<b>L'utilisateur existe déjà</b><br />\n";
 					}
 					else
-						echo "<b>Could not add user information in user info table: " . da_sql_error($link,$config) . "</b><br>\n";
+						echo "<b>Une erreur s'est produite lors de la création du compte : " . da_sql_error($link,$config) . "</b><br />\n";
 				}
 				// si on veut ajouter les nouveau utilisateurs a un groupe par défaut, autre que celui par défaut d'alcasar
 				if (isset($Fgroup) && $Fgroup != ''){
@@ -226,13 +228,13 @@ if(isset($_POST['Fmail'])){
 							"INSERT INTO $config[sql_usergroup_table]
 							(username,groupname) VALUES ('$login','$Fgroup');");
 							if (!$res || !da_sql_affected_rows($link,$res,$config))
-								echo "<b>Could not add user to group $Fgroup. SQL Error</b><br>\n";
+								echo "<b>Impossible d'ajouter l'utilisateur dans le groupe $Fgroup.</b><br />\n";
 						}
 						else
-							echo "<b>User already is a member of group $Fgroup</b><br>\n";
+							echo "<b>L'utilisateur est déjà présent dans le groupe $Fgroup</b><br />\n";
 					}
 					else
-						echo "<b>Could not add user to group $Fgroup: " . da_sql_error($link,$config) . "</b><br>\n";
+						echo "<b>Impossible d'ajouter l'utilisateur dans le groupe $Fgroup: " . da_sql_error($link,$config) . "</b><br />\n";
 				}
 				if (!$da_abort){
 					if (isset($Fgroup) && $Fgroup != '')
@@ -262,7 +264,7 @@ if(isset($_POST['Fmail'])){
 						if ($op_val != ''){
 							$op_val = da_sql_escape_string($link, $op_val);
 							if (check_operator($op_val,$type) == -1){
-								echo "<b>Invalid operator ($op_val) for attribute $key</b><br>\n";
+								echo "<b>Invalid operator ($op_val) for attribute $key</b><br />\n";
 								continue;
 							}
 							$op_val2 = ",'$op_val'";
@@ -274,7 +276,7 @@ if(isset($_POST['Fmail'])){
 							VALUES ('$attrmap[$key]','$val','$login' $op_val2);";
 						$res = da_sql_query($link,$config,$sqlquery);
 						if (!$res || !da_sql_affected_rows($link,$res,$config))
-							echo "<b>Query failed for attribute $key: " . da_sql_error($link,$config) . "</b><br>\n";
+							echo "<b>Query failed for attribute $key: " . da_sql_error($link,$config) . "</b><br />\n";
 					}
 				}
 				
@@ -285,10 +287,10 @@ if(isset($_POST['Fmail'])){
 				$time = date_create('now')->format('d-m-Y H:i:s');
 				$domain = $conf["DOMAIN"];
 				$hostname  = $conf["HOSTNAME"].'.'.$domain;
-				$hostname  = alcasar.laplateforme.io;
+				$hostname  = "alcasar.laplateforme.io";
 				
 				$to = $Fmail;
-				$from = "administrateur@$domain";
+				$from = "alcasar@$domain";
 				$subject = "Activation de votre compte ALCASAR";
 				$message = "<!DOCTYPE html>
 						<html>
@@ -298,8 +300,8 @@ if(isset($_POST['Fmail'])){
 							<body>
 								Bonjour,<br/><br/>
 
-								<h3>Vous vous êtes inscrit à ALCASR $domain, <strong>ALCASAR</strong>!</h3>
-								<p>Ceci est un mail automatique avec vos identifiants, veuillez changer votre mot de passe.<br/>
+								<h3>Bienvenue sur ALCASAR @ $domain</h3>
+								<p>Ceci est un email automatique avec vos identifiants, veuillez changer votre mot de passe.<br/>
 
 								<h4>Indentifiants de connexion:</h4>  
 								<pre>								
@@ -316,15 +318,15 @@ if(isset($_POST['Fmail'])){
 				$header .= "Content-type: text/html; charset=utf-8\n";
 
 				if(mail($to, $subject, $message, $header)){
-					echo "<center><b>success : $l_user '$login' $l_created</b></center><br>";
-					echo "<center><b>success : Email avec identifiants envoyé.</b></center><br>";
+					echo "<center><b>Vous y êtes presque ! $l_user '$login' $l_created</b></center><br />";
+					echo "<center><b>Un email contenant vos informations de connexion vient de vous être envoyé.</b></center><br />";
 
 					
 					// le mail pour l'uitilisateur est envoyé, si l'admin a configuré son mail, on lui envoi
 					// une notification d'inscription avec l'ip, l'heure, et le login de l'utilisateur
 					if (!empty($adminMail)){
 						$to = $adminMail;
-						$from = "administrateur@$domain";
+						$from = "alcasar@$domain";
 						$subject = "Nouvelle inscription sur ALCASAR";
 						$message = "<!DOCTYPE html>
 							<html>
@@ -334,8 +336,8 @@ if(isset($_POST['Fmail'])){
 								<body>
 									Bonjour,<br/><br/>
 
-									<h3>Nouvelle inscription à <strong>ALCASR $domain</strong>!</h3>
 									<p>Ceci est un mail automatique.<br/>
+									<h3>Une nouvelle inscription à <strong>ALCASR $domain</strong> a été faite.</h3>
 
 									<h4>Indentifiants de connexion:</h4>  
 									<pre>								
@@ -344,7 +346,7 @@ if(isset($_POST['Fmail'])){
 										Login :		$login
 										Email :		$Fmail 
 									</pre> 
-									<p>ALCASAR<a href=\"https://$hostname\">$domain</a></p>
+									<p>ALCASAR <a href=\"https://$hostname\">$domain</a></p>
 								</body>
 							</html>";
 
@@ -368,14 +370,14 @@ if(isset($_POST['Fmail'])){
 
 //					da_sql_close($link,$config)
 */
-					echo "<b>Erreur lors de l'envoi du mail, veuillez renouveler votre inscription. utilisez le formulaire de réinitialisation, ou contactez votre administrateur.</b><br>\n";
+					echo "<b>Erreur lors de l'envoi du mail, veuillez renouveler votre inscription. Utilisez le formulaire de réinitialisation, ou contactez votre administrateur.</b><br />\n";
 				}
 			}
-			else
-				echo "<b>Could not open encryption library file</b><br>\n";
+			else // Could not open encryption library file
+				echo "<b>Erreur lors de la création du compte</b><br />\n";
 		}
-		else
-			echo "<b>Could not connect to SQL database</b><br>\n";
+		else // Could not connect to SQL database
+			echo "<b>Erreur lors de la création du compte</b><br />\n";
 	}
 }
 ?>
