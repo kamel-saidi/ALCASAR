@@ -42,9 +42,9 @@ l'interactvité avec l'administrateur à l'installation a pour but de :
  Selon le cas il y a des options obligatoires et d'autres facultatives:
   Cas 1 : la seule option obligatoire est -1
   Cas 2 : -2 -s "SMTP" -p port -r "ip du relais pour le firewall" "sinon il prendra par défaut 0.0.0.0./0"
-  Cas 3 : -3 -m "mail" -o "password" -s "SMTP" -p 3 port"
+  Cas 3 : -3 -m "mail" -o "password" -s "SMTP" -p "port"
 
- Les autres options peuvent être ajoutées à l'obligatoire, ou seules
+ Les autres options peuvent être ajoutées aux options obligatoires, ou misent seules
 	ex : alcasar-mail-install.sh -3 -s "smtp.gmail.com" -p 587 -m mail@gmail.com -o psswd -w 'domain1.com, domain2.com'.
   ex : alcasar-mail-install.sh -b 'domain1.com, domain2.com'.
   ex : alcasar-mail-install.sh -a admin@mail.com.
