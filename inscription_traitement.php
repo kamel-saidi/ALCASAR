@@ -11,9 +11,9 @@
 *	-Lit le fichier de configuration /usr/local/etc/alcasar-mail.conf.	*
 *	-Verifie si le login est présent dans la radcheck.			*
 *	-Verifie si le mail est présent dans la userinfo.			*
-*	-Verifie si le domaine du mail est sur WLD ou BLD (optionnel).		*
-*	-Inscrit l'utilisateur avec mot de passe aléatoir.			*
-*	-Envoi l'email a l'utilisaeur, et à l'admin avec date et IP.		*
+*	-Verifie si le domaine du mail est sur WLD (optionnel).			*
+*	-Inscrit l'utilisateur avec mot de passe aléatoire.			*
+*	-Envoi l'email à l'utilisaeur, et à l'admin avec date et IP.		*
 *										*
 *********************************************************************************/
 
@@ -77,7 +77,7 @@ function GenPassword($nb_car="8")
 	return $password;
 }
 
-// Lecture du fichier de configuration, récupération des listes WLD/BLD et l'email de l'admin
+// Lecture du fichier de configuration, récupération des listes WLD et l'email de l'admin
 $alcasarMailConf = "/usr/local/etc/alcasar-mail.conf";
 if (is_file ($alcasarMailConf)){
 	$tab=file($alcasarMailConf);
@@ -89,9 +89,6 @@ if (is_file ($alcasarMailConf)){
 			switch ($field[0]){
 				case 'whiteDomain':
 					$whiteDomain = explode(" ", strtolower(trim($field[1])));
-				break;
-				case 'blackDomain':
-					$blackDomain = explode(" ", strtolower(trim($field[1])));
 				break;
 				case 'adminMail':
 					$adminMail = $field[1];
@@ -123,14 +120,6 @@ if(isset($_POST['Fmail'])){
 		}
 	}
 
-	// on vérifie si le domaine est dans la BLD, si c'est le cas on bloque
-	if (!empty($blackDomain)){
-		if (in_array($domain, $blackDomain)){
-			echo "Le domaine $domain n'est pas autorisé";
-			exit();
-		}
-	}
-	
 	$login  = $Fmail;
 	
 	// si le login est présent
@@ -318,8 +307,8 @@ if(isset($_POST['Fmail'])){
 				$header .= "Content-type: text/html; charset=utf-8\n";
 
 				if(mail($to, $subject, $message, $header)){
-					echo "<center><b>Vous y êtes presque ! $l_user '$login' $l_created</b></center><br />";
-					echo "<center><b>Un email contenant vos informations de connexion vient de vous être envoyé.</b></center><br />";
+					echo "<center>success : <b>Vous y êtes presque ! $l_user '$login' $l_created</b></center><br />";
+					echo "<center>success : <b>Un email contenant vos informations de connexion vient de vous être envoyé.</b></center><br />";
 
 					
 					// le mail pour l'uitilisateur est envoyé, si l'admin a configuré son mail, on lui envoi
