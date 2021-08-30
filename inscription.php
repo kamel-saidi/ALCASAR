@@ -15,21 +15,10 @@
 
 $l_title = "Inscription";
 
+//require_once "navbar.php";
+require_once "header.php";
 ?>
 	
-			
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>ALCASAR - <?= $l_title ?></title>
-	<link rel="stylesheet" type="text/css" href="css/pwdmeter.css"> 
-	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
-	<link rel="stylesheet" type="text/css" href="css/pass.css">
-	<link rel="icon" href="images/favicon-48.ico" type="image/ico">
-</head>
-<body>
 	<div class="col-xs-12 col-md-10 col-md-offset-1"> 
 		<!-- HeaderBox -->
 		<div class="row banner">
@@ -55,7 +44,6 @@ $l_title = "Inscription";
 		</div>
 
 		<section id="inscription" class="row">
-
 			<form name="master" id="contenu_acces" onsubmit="return false;" class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10">
 				<div class="row input_row">
 					<div class="label_name col-xs-3 col-sm-3 col-md-4">courrier électronique: *</div>
@@ -75,11 +63,6 @@ $l_title = "Inscription";
 						<button type="submit" class="btn btn-primary btn-lg" id="buttons" >Inscription</button>
 					</div>
 				</div>
-				<div>
-					<span style="float: left;">&rarr; <a href="password.php" style="color: #012;">Changer de mot de passe</a> &larr;</span>
-					<span>&rarr; <a href="index.php" style="color: #012;">Accueil</a> &larr;</span>
-					<span style="float: right;">&rarr; <a href="reset.php" style="color: #012;">Mot de passe oublié ?</a> &larr;</span>
-				</div>					
 			</form>
 		</section>
 			
