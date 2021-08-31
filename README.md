@@ -90,7 +90,7 @@ S'il est lancé en mode interactif il éxecute à la fin alcasar-mail-wld-bld.sh
   
   il faut impérativement éditer le fichier /etc/sudoers via la commande visudo et :
   - ajouter cette ligne parmis les alias des commandes
-    Cmnd_Alias      MAIL_SERVICE=/usr/local/bin/alcasar-mail-install.sh,/usr/local/bin/alcasar-mail-uninstall.sh            # Service mail commands to execute whith web server
+    Cmnd_Alias      MAIL_SERVICE=/usr/local/bin/alcasar-mail-install.sh,/usr/local/bin/alcasar-mail-uninstall.sh            # Service mail commands to execute with web server
   - modifier cette ligne 
 ADMWEB  LAN_ORG=(root)  NOPASSWD: NET,SYSTEM_BACKUP,SQL,BL,NF,EXPORT,RADDB,LOGOUT,UAM,SERVICE,GAMMU,SSL,HTDIGEST,LOG_GEN,LDAP,IOT_CAPTURE,WIFI4EU,MAIL_SERVICE
 
