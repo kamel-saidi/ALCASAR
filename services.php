@@ -1,5 +1,87 @@
 <?php
 /* written by steweb57 & Rexy */
+
+
+// partie $_POST du service mail
+
+$php_self = htmlspecialchars($_SERVER['PHP_SELF']);
+// Traiter les formulaires de la partie MAIL SERVICE
+if(!empty($_POST)){
+
+	var_dump($_POST);
+/*	// procéder a l'installtion de postfix
+	if (!empty($_POST['install'])){
+		exec('sudo dnf install -y postfix', $output, $retval);
+//		header("Location:services.php");
+		var_dump($output);
+		echo "<br>\$retval : " . $retval;
+	}
+*/
+// La variable qui contiendra les options et les arguments a passer à l'install
+	$optArg = "";
+	
+	if(!empty($_POST['testConf'])){ 	
+		$optArg .= " -".trim($_POST['testConf']);
+	}
+	if(!empty($_POST['smtp'])){ 	
+		$optArg .= " -s \"".trim($_POST['smtp'])."\"";
+	}
+	if(!empty($_POST['port'])){ 	
+		$optArg .= " -p \"".trim($_POST['port'])."\"";
+	}
+	if(!empty($_POST['smtpPort'])){ 	
+		$smtpPort = explode(" ", $_POST['smtpPort']);
+		$optArg .= " -s \"".trim($smtpPort[0])."\" -p \"".trim($smtpPort[1])."\"";
+	}
+	if(!empty($_POST['smtpIP'])){ 	
+		$optArg .= " -r \"".trim($_POST['smtpIP'])."\"";
+	}
+	if(!empty($_POST['mailAddr'])){ 	
+		$optArg .= " -m \"".trim($_POST['mailAddr'])."\"";
+	}
+	if(!empty($_POST['pswd1']) && !empty($_POST['pswd2'])){
+		if (trim($_POST['pswd1']) == trim($_POST['pswd2'])){
+			$optArg .= " -o \"".trim($_POST['pswd2'])."\"";
+		} else {
+			echo "<script> alert(\"Les deux mots de passe sont différents\"); window.location.href=\"services.php\";</script>";
+		}
+	}
+	if(!empty($_POST['adminMail'])){ 	
+		$optArg .= " -a \"".$_POST['adminMail']."\"";
+	}
+	if(!empty($_POST['wld'])){ 	
+		$optArg .= " -w \"".str_replace("\r"," ",trim($_POST['wld']))."\"";
+	}
+
+// Supprimer la WLD ou l'email de l'admin
+	if(!empty($_POST['unset'])){
+		exec("sudo sed -i '/". $_POST['unset']."/d' /usr/local/etc/alcasar-mail.conf", $output, $retval);
+
+		var_dump($output);
+		echo "<br>\$retval : " . $retval;
+	}
+
+// Supprimer toute la configuration actuelle
+	if(!empty($_POST['uninstall'])){
+//		echo "sudo /usr/local/bin/alcasar-mail-uninstall.sh <br>";
+		exec("sudo /usr/local/bin/alcasar-mail-uninstall.sh", $output, $retval);
+
+		var_dump($output);
+		echo "<br>\$retval : " . $retval;
+	}
+	
+	if(!empty($optArg)){
+		echo "sudo /usr/local/bin/alcasar-mail-install.sh".$optArg;
+		exec("sudo /usr/local/bin/alcasar-mail-install.sh".escapeshellcmd($optArg), $output, $retval);
+		var_dump($output);
+		echo "<br>\$retval : " . $retval;
+	}
+//	à décommenté une fois tests et debugs réalisé pour recharger la page sansle $_POST
+//	header("Location:services.php");
+
+}// Fin de la partie $_POST du service mail
+
+
 # Choice of language
 $Language = 'en';
 if(isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])){
@@ -27,6 +109,7 @@ if($Language == 'fr') {
 	$l_clamav_freshclam	= "Mise à jour de l'antivirus (toutes les 4 heures)";
 	$l_clamav_daemon	= "Antimalware";
 	$l_ntpd			= "Service de mise à l'heure réseau";
+	$l_postfix		= "Service de messagerie";
 	$l_fail2ban		= "Détecteur d'intrusion";
 	$l_nfcapd 		= "Collecteur de flux NetFlow";
 	$l_vnstat		= "Grapheur de flux réseau";
@@ -223,7 +306,7 @@ if (isset($_POST['system'])){
 //-------------------------------
 // Actions on services
 //-------------------------------
-$autorizeService = array("radiusd","chilli","mysqld","lighttpd","unbound-forward","ulogd-ssh","ulogd-ext-access","ulogd-traceability","unbound-blacklist","unbound-whitelist","dnsmasq-whitelist","unbound-blackhole","e2guardian","clamav-daemon","clamav-freshclam","sshd","ntpd","fail2ban","nfcapd","vnstat");
+$autorizeService = array("radiusd","chilli","mysqld","lighttpd","unbound-forward","ulogd-ssh","ulogd-ext-access","ulogd-traceability","unbound-blacklist","unbound-whitelist","dnsmasq-whitelist","unbound-blackhole","e2guardian","clamav-daemon","clamav-freshclam","sshd","ntpd","fail2ban","nfcapd","vnstat","postfix");
 $autorizeAction = array("start","stop","restart");
 
 if (isset($_GET['service'])&&(in_array($_GET['service'], $autorizeService))) {
@@ -250,6 +333,7 @@ $MainServiceStatus['sshd'] = checkServiceStatus("sshd");
 $MainServiceStatus['ntpd'] = checkServiceStatus("ntpd");
 $MainServiceStatus['fail2ban'] = checkServiceStatus("fail2ban");
 $MainServiceStatus['vnstat'] = checkServiceStatus("vnstat");
+$MainServiceStatus['postfix'] = checkServiceStatus("postfix");
 
 $FilterServiceStatus = array();
 $FilterServiceStatus['unbound_blacklist'] = checkServiceStatus("unbound-blacklist");
@@ -270,6 +354,7 @@ $FilterServiceStatus['clamav_freshclam'] = checkServiceStatus("clamav-freshclam"
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title><?php echo $l_services_title; ?></title>
 	<link rel="stylesheet" href="/css/acc.css" type="text/css">
+	<script type="text/javascript" src="/js/jquery.min.js"></script>
 </head>
 <body>
 <div class="panel">
@@ -279,7 +364,8 @@ $FilterServiceStatus['clamav_freshclam'] = checkServiceStatus("clamav-freshclam"
 		<tr align="center"><td><?php echo $l_service_status;?></td><td colspan="2"><?php echo $l_service_title;?></td><td colspan="3"><?php echo $l_service_action;?></td></tr>
 		<?php foreach( $MainServiceStatus as $serviceName => $statusOK ) { ?>
 		<tr>
-		<?php if ($statusOK) { ?>
+		<?php if ($serviceName != "postfix"){
+			if ($statusOK) { ?>
 			<td align="center"><img src="/images/state_ok.gif" width="15" height="15" alt="<?php echo $l_service_status_img_ok; ?>"></td>
 			<td align="center"><?php $comment="l_$serviceName"; echo "<b>$serviceName</b></td><td>${$comment}" ;?> </td>
 			<td width="80" align="center">---</td>
@@ -293,7 +379,8 @@ $FilterServiceStatus['clamav_freshclam'] = checkServiceStatus("clamav-freshclam"
 			<td width="80" align="center">---</td>
 		<?php } ?>
 		</tr>
-		<?php } ?>
+		<?php }
+		} ?>
 	</table>
 	</div>
 </div>
@@ -326,9 +413,78 @@ $FilterServiceStatus['clamav_freshclam'] = checkServiceStatus("clamav-freshclam"
 <div class="panel">
 	<div class="panel-header"><?= $l_opt_services ?></div>
 	<div class="panel-row">
-	<form action="<?php echo $_SERVER['PHP_SELF']?>" method=POST>
+
 	<table width="100%" border=0 cellspacing=0 cellpadding=0>
 		<tr align="center"><td><?php echo $l_service_status;?></td><td colspan="2"> </td><td colspan="3"><?php echo $l_service_action;?></td></tr>
+
+<?php
+/*
+// POSTFIX
+exec("sudo rpm" . escapeshellarg("-q postfix"), $output, $retval);
+		var_dump($output);
+		echo "<br>\$retval : " . $retval;
+exec("sudo ip" . escapeshellarg("a"), $output, $retval);
+		var_dump($output);
+		echo "<br>\$retval : " . $retval;
+// si POSTFIX n'est pas installé, on propose l'installation
+if ($retval == 1){  
+
+echo <<<EOT
+		<tr align="center">
+			<td colspan="3"><b>POSTFIX n'est pas installé.</b></td>
+			<td>
+				<form id="install" action="$php_self" method=POST>
+					<input type="hidden" name="install" value="install">
+					<input type=submit form="install" value="Install">
+				</form>
+			</td>
+		</tr>
+EOT;
+
+// si POSFIX est installé
+} else {
+*/
+// la partie tableau qui affiche les statut du service POSTFIX, et possiblité de start, restart & stop
+		$serviceName = "postfix";
+		if(array_key_exists($serviceName, $MainServiceStatus)){
+
+			$statusOK = $MainServiceStatus['postfix'];
+			$comment="l_$serviceName";
+			$stopService =  $_SERVER['PHP_SELF']."?action=stop&service=".str_replace('_','-',$serviceName);
+			$startService = $_SERVER['PHP_SELF']."?action=start&service=".str_replace('_','-',$serviceName);
+			$restartService = $_SERVER['PHP_SELF']."?action=restart&service=".str_replace('_','-',$serviceName);
+//			$restartService = $_SERVER['PHP_SELF']."?action=restart&service=".str_replace('_','-',$serviceName)."\\";
+
+			echo "<tr>";
+			if ($statusOK) {
+echo <<<EOT
+				<td align="center"><img src="/images/state_ok.gif" width="15" height="15" alt="$l_service_status_img_ok"></td>
+				<td align="center"><b>$serviceName</b></td>
+				<td align="center">${$comment}</td>
+				<td width="80" align="center">---</td>
+				<td width="80" align="center">
+					<a href=$stopService>$l_service_stop</a></td>
+				<td width="80" align="center">
+					<a href=$restartService>$l_service_restart</a></td>
+EOT;
+			} else {
+echo <<<EOT
+				<td align="center"><img src="/images/state_error.gif" width="15" height="15" alt="$l_service_status_img_ko"></td>
+				<td align="center">$serviceName</td>
+				<td align="center">${$comment}</td>
+				<td width="80" align="center">
+					<a href=$startService>$l_service_start</a></td>
+				<td width="80" align="center">---</td>
+				<td width="80" align="center">---</td>
+EOT;
+			}
+			echo "</tr>";
+		}
+//}
+// POSTFIX end
+?>
+
+		<form action="<?php echo $_SERVER['PHP_SELF']?>" method=POST>
 		<tr>
 			<?php if ($wifi4eu == "on") { ?>
 			<td align="center"><img src="/images/state_ok.gif" width="15" height="15" alt="<?php echo $l_service_status_img_ok; ?>"></td>
@@ -344,10 +500,13 @@ $FilterServiceStatus['clamav_freshclam'] = checkServiceStatus("clamav-freshclam"
 			<td width="80" align="center">---</td>
 			<?php } ?>
 		</tr>
+		</form>
+
 	</table>
-	</form>
 	</div>
 </div>
+
+
 <div class="panel">
 	<div class="panel-header"><?= $l_stop_restart ?></div>
 	<div class="panel-row">
@@ -364,5 +523,391 @@ $FilterServiceStatus['clamav_freshclam'] = checkServiceStatus("clamav-freshclam"
 	</table>
 	</div>
 </div>
+
+
+<!-- Code de la partie mail service, il ne faut pas oublier de rajouter jquery dans le head du html -->
+
+<?php
+
+echo <<<EOT
+
+<div class="panel">
+	<div class="panel-header">POSTFIX actuelle Configuration</div>
+	<div class="panel-row">
+		<table width="100%" border=0 cellspacing=0 cellpadding=0><br>
+
+EOT;
+
+// la conf actuelle, si le fichier alcasar-mail.conf est présent
+			$alcasarMailConf = "/usr/local/etc/alcasar-mail.conf";
+			if (is_file ($alcasarMailConf)){
+
+				$tab=file($alcasarMailConf);
+
+				if ($tab){
+					foreach ($tab as $line)		{
+
+						$field=explode("=", $line);
+
+						switch ($field[0]) {
+						
+							case 'smtp':
+								$smtp = trim($field[1]);
+echo <<<EOT
+								<tr align="center">
+									<td><b>SMTP : </b>$smtp</td>
+								</tr>
+EOT;
+							break;
+							case 'port':
+								$port = trim($field[1]);
+echo <<<EOT
+								<tr align="center">
+									<td><b>Port : </b>$port</td>
+								</tr>
+EOT;
+							break;
+							case 'smtpIP':
+								$smtpIP = trim($field[1]);
+echo <<<EOT
+								<tr align="center">
+									<td><b>SMTP ip : </b>$smtpIP</td>
+								</tr>
+EOT;
+							break;
+							case 'mailAddr':
+								$mailAddr = trim($field[1]);
+echo <<<EOT
+								<tr align="center">
+									<td><b>Email Addr : </b>$mailAddr</td>
+								</tr>
+EOT;
+							break;
+							case 'adminMail':
+								$adminMail = trim($field[1]);
+echo <<<EOT
+								<tr align="center">
+									<td><b>Admin email : </b>$adminMail</td>
+								</tr>
+EOT;
+							break;
+							case 'whiteDomain':
+								$whiteDomain = explode(" ", trim($field[1]));
+							break;
+						}
+					}
+				}
+echo <<<EOT
+			<form action="$php_self" method="post">
+				<tr align="center">
+					<td colspan="2">
+						<input type="hidden" name="uninstall" value="uninstall">
+						<br><input type="submit" class="btn btn-default" name="submit" value="Supprimer toute la configuration">
+					</td>
+				</tr>
+			</form>
+				<tr align="center">
+					<td colspan="2"><font color=red>ATTENTION : la suppression enlève toute la configuration du SERVICE MAIL</font>
+
+					</td>
+				</tr>
+EOT;
+			// si le fichier alcasar-mail.conf n'existe pas
+			} else {
+
+echo <<<EOT
+			<tr align="center">
+				<td><b>POSTFIX n'est pas configuré par ALCASAR.</b></td>
+			</tr>
+EOT;
+
+			}
+
+// Partie de paramétrage de la configuration
+
+// Configuration de l'adresse email de l'administrateur
+echo <<<EOT
+		</table><br>
+	</div>
+</div><br>
+<div class="panel">
+	<div class="panel-header">POSTFIX Configuration</div>
+	<div class="panel-row conf" id="conf">	
+		<table width="100%" border=0 cellspacing=0 cellpadding=0><br>
+			<tr align="center">
+				<td><input type="radio" name="conf" class="mail" value="One"/><b>Service autonome</b></td>
+				<td><input type="radio" name="conf" class="mail" value="Two"/><b>Service relay</b></td>
+				<td><input type="radio" name="conf" class="mail" value="Three"/> <b>Adresse mail</b></td>
+			</tr>
+		</table><br>
+	</div>
+	<div class="myDiv hide" id="showOne">
+		<table width="100%" border=0 cellspacing=0 cellpadding=0><br>
+			<tr align="center">
+				<td><b>Serveur mail est autonome :</b></td>
+			</tr>
+			<tr align="center">
+				<td>
+					<form action="$php_self" method="post">
+						<input type="hidden" name="testConf" value="1">
+						<input type="submit" class="btn btn-default" name="submit" value="Configurer"><br>
+					</form>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<div class="myDiv hide" id="showTwo">
+		<table width="100%" border=0 cellspacing=0 cellpadding=0><br>
+			<form action="$php_self" method="post">
+				<tr align="center">
+					<td colspan="2"><b>SMTP Relais :</b></td>
+				</tr>
+				<tr align="center">
+					<td colspan="2">Postfix envois, ralaye les emails sorants à un autre serveur SMTP.</td>
+				</tr>
+				<tr>
+					<td><label>Enterez le serveur SMTP relai en FQDN ou IP</label></td>
+					<td><input type="text" name="smtp" placeholder="SMTP" required/></td>
+				</tr>
+				<tr>
+					<td><label>Enterez le port SMTP</label></td>
+					<td><input type="text" name="port" placeholder="port" required/></td>
+				</tr>
+				<tr>
+					<td><label>Enterez l'IP du serveur SMTP relais (0.0.0.0/0 si c'est dynamique/par défaut si vide)</label></td>
+					<td><input type="text" name="smtpIP" placeholder="IP du SMTP relais" required/></td>
+				</tr>
+				<tr align="center">
+					<td colspan="2">
+						<input type="hidden" name="testConf" value="2">
+						<input type="submit" class="btn btn-default" name="submit" value="Valider"><br>
+					</td>
+				</tr>
+			</form>
+		</table><br>
+	</div>
+
+	<div class="myDiv hide" id="showThree">
+		<table width="100%" border=0 cellspacing=0 cellpadding=0><br>
+			<form method="post" action="$php_self">
+				<tr colspan="2" align="center">
+					<td><b>Configuration de serveur mail via un compte email :</b></td>
+				</tr>
+				<tr align="center">
+					<td>
+						<table class="table table-striped">
+							<tr>
+								<td><label>Entez votre email</label></td>
+								<td><input type="email" name="mailAddr" placeholder="Enter your email" required/></td>
+							</tr>
+							<tr>
+								<td><label>Entez le mot de passe</label></td>
+								<td><input type="password" id="pswd1" name="pswd1" required/></td>
+							</tr>
+							<tr>
+								<td><label>Confirmer le mot de passe</label></td>
+								<td><input type="password" id="pswd2" name="pswd2" required/></td>
+							</tr>
+
+						</table>
+						<table class="table table-striped">
+						  <thead>
+							    <tr>
+							      <th scope="col">#</th>
+							      <th scope="col">compte de messagerie</th>
+							      <th scope="col">adresse de messagerie</th>
+							      <th scope="col">serveur sortant</th>
+							      <th scope="col">port sortant</th>
+							    </tr>
+						  </thead>
+						  <tbody>
+EOT;
+$smtpsConf = [
+	["Orange", "Orange/Wanadoo", "orange.fr /wanadoo.fr", "smtp.orange.fr", 465],
+	["Hotmail", "Hotmail", "hotmail.com/.fr / live.com/.fr / msn.com", "smtp.live.com", 587],
+	["Outlook", "Outlook", "hotmail.xx/live.xx/msn.com/outlook/office365", "smtp.office365.com", 587],
+	["SFR", "SFR", "sfr.fr", "smtp.sfr.fr", 465],
+	["Free", "Free", "free.fr", "smtp.free.fr", 465],
+	["Gmail", "Gmail", "gmail.com", "smtp.gmail.com", 587],
+	["Laposte", "Laposte", "laposte.net", "smtp.laposte.net", 465],
+	["Bouygues", "Bouygues Telecom", "bbox.fr", "smtp.bbox.fr", 587]
+];
+
+foreach( $smtpsConf as $smtpConf ) {
+echo <<< EOT
+							    <tr>
+							      <th scope="row"><input class="form-check-input blur" type="radio" name="smtpPort" value="$smtpConf[3] $smtpConf[4]"/></th>
+
+							      <td>$smtpConf[1]</td>
+							      <td>$smtpConf[2]</td>
+							      <td>$smtpConf[3]</td>
+							      <td align="center">$smtpConf[4]</td>
+							    </tr>
+EOT;
+}
+echo<<<EOT
+							    <tr>
+							      <th scope="row"><input id="perso" class="form-check-input" type="radio" name="smtpPort"/></th>
+							      <td>Personalisez votre smtp</td>
+							      <td><input type="text" id="smtpPerso" name="smtpPerso" class="perso" oninput="valPerso()" placeholder="Entrez le serveur SMTP" disabled/></td>
+							      <td>Personalisez le port</td>
+							      <td><input type="text" id="portPerso" name="portPerso" class="perso" oninput="valPerso()" placeholder="Entrez le serveur Port" disabled/></td>
+							    </tr>
+						  </tbody>
+						</table>
+			  		</td>
+				</tr>
+				<tr align="center">
+					<td class="testConf3">
+					</td>
+				</tr>
+				<tr align="center">
+					<td>
+						<input type="hidden" name="testConf" value="3">
+						<input type="submit" class="btn btn-default" name="submit" value="Valider" id="testConf3"><br>
+					</td>
+				</tr>
+			</form>	  
+		</table><br>
+	</div>
+</div><br>
+<div class="panel">
+	<div class="panel-header">Mail admin</div>
+	<div class="panel-row conf" id="conf">	
+		<table width="100%" border=0 cellspacing=0 cellpadding=0><br>
+			<form action="$php_self" method="post">
+				<tr align="center">
+					<td colspan="2"><b>Mail admin</b></td>
+				</tr>
+				<tr align="center">
+					<td colspan="2">L'adresse email de l'administrateur pour recevoir les alertes des nouvelles inscriptions, et l'archive hebdomadaire des logs</td>
+				</tr>
+				<tr>
+EOT;
+					if (empty($adminMail)){
+						echo "<td><label>Enterez l'adresse email</label></td>";
+					} else {
+						echo "<td>L'email configuré actuellement est : " . $adminMail . "</td>";
+					}
+echo <<<EOT
+					<td><input type="email" name="adminMail" placeholder="Enter your email" required/></td>
+				</tr>
+
+				<tr align="center">
+					<td colspan="2">
+						<input type="submit" class="btn btn-default" name="submit" value="Valider"><br>
+					</td>
+				</tr>
+			</form>
+			<form action="$php_self" method="post">
+				<tr align="center">
+					<td colspan="2">
+						<input type="hidden" name="unset" value="adminMail">
+						<input type="submit" class="btn btn-default" name="submit" value="Supprimer l'admin email"><br>
+					</td>
+				</tr>
+			</form>
+		</table><br>
+	</div>
+</div><br>
+<div class="panel">
+	<div class="panel-header">WhiteList Domains Configuration</div>
+	<div class="panel-row conf" id="conf">	
+		<table width="100%" border=0 cellspacing=0 cellpadding=0><br>
+			<tr align="center">
+				<td>La liste blanche limite les inscriptions utilisateurs à un, ou plusieurs domaines.</td>
+			</tr>
+			<form method="post" action="$php_self">
+				<tr align="center">
+					<td width="50%" align="center">Mettez vos domaines à configurer. Un par ligne</td>
+				</tr>
+				<tr align="center">
+					<td>
+ 						<br><textarea name='wld' rows=5 cols=50 placeholder="Aucune WLD configurée actuellement"">
+EOT;
+if(!empty($whiteDomain)){
+	foreach ($whiteDomain as $domain){
+		echo "$domain\n";
+	}
+}
+echo<<<EOT
+</textarea>
+					</td>
+				</tr>
+				<tr align="center">
+					<td colspan="2">
+						<br><input type="submit" class="btn btn-default" name="submit" value="Valider"><br>
+					</td>
+				</tr>
+			</form>
+			<form action="$php_self" method="post">
+				<tr align="center">
+					<td colspan="2">
+						<input type="hidden" name="unset" value="whiteDomain">
+						<input type="submit" class="btn btn-default" name="submit" value="Supprimer la WLD"><br>
+					</td>
+				</tr>
+			</form>
+		</table><br>
+	</div>
+</div><br>
+
+EOT;
+
+?>
+
+<script>
+	$(document).ready(function(){
+		$("div.hide").hide();
+
+		$('#conf input[type="radio"]').click(function(){
+			var value = $(this).val(); 
+			$("div.myDiv").hide();
+			$("#show"+value).show();
+		});
+
+		//On vérifie si le mot de passe est ok
+		$("#pswd2").keyup(function(){
+			if($("#pswd1").val() != "" && $("#pswd2").val() != "" && $("#pswd1").val() != $("#pswd2").val()){
+				$(".testConf3").html("<br>Les deux mots de passe sont différents");
+				$("#testConf3").attr("disabled", true);
+			} else {
+				$("#testConf3").attr("disabled", false);
+				$(".testConf3").fadeOut(800);
+			}
+		})
+	});
+
+	$('#perso').click(function(){
+
+		$(".perso").attr("disabled", false);
+	});
+
+	$('.blur').click(function(){
+
+		$(".perso").attr("disabled", true);
+	});
+
+	function valPerso(){
+		var valSmtpPerso = document.getElementById("smtpPerso").value;
+		var valPortPerso = document.getElementById("portPerso").value;
+		document.getElementById("perso").value = valSmtpPerso + " " + valPortPerso;
+	};
+
+	function hideShow(x){
+		$("div." + x).toggle();
+		var value = $("input." + x).val();
+		var elem = document.getElementById("btn-" + x);
+		if (elem.value=="Configurer"){
+			elem.value = "Annuler";
+		} else{
+			elem.value = "Configurer";
+		}
+	};
+
+</script>
+
+
 </body>
 </html>
