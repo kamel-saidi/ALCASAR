@@ -1,15 +1,21 @@
 # ALCASAR MAIL SERVICE
 
-- alcasar-mail-install.sh
-- alcasar-mail-uninstall.sh
-- alcasar-mail-wld.sh
+* alcasar-mail-install.sh
+* alcasar-mail-uninstall.sh
+* alcasar-mail-wld.sh
 Ces fichiers sont à mettre dans le dossier /usr/local/bin pour être executés en tant que commande depuis la cli.
 
 
-- header.php
-- inscription.php
-- inscription_traitement.php
+* header.php
+* inscription.php
+* inscription_traitement.php
 Ces fichiers sont à mettre dans le dossier /var/www/html.
+
+
+* services.php
+Ce fichier est à mettre dans le dossier /var/www/html/acc/admin.
+
+
 
 - alcasar-mail-install.sh :
 
@@ -73,7 +79,20 @@ S'il est lancé en mode interactif il éxecute à la fin alcasar-mail-wld-bld.sh
   La barre de navigation.
   
 - inscription.php
-  La partie front de la page d'inscription des utilisateurs, si WLD ou BLD sont configurées alors les inscriptions seront limitées, filtrées.
+  La partie front de la page d'inscription des utilisateurs, si WLD est configurée alors les inscriptions seront limitées, filtrées.
   
 - inscription_traitement.php
   La partie back de la page d'inscription.
+  
+  
+- services.php
+  La page des services de l'ACC, rajout de l'état de POSTFIX dans les services optioenels, et la partie des configurations pour l'envoi des emails, pour l'email de l'administrateur, de la WLD.
+  
+  il faut impérativement éditer le fichier /etc/sudoers via la commande visudo et :
+  - ajouter cette ligne parmis les alias des commandes
+    Cmnd_Alias      MAIL_SERVICE=/usr/local/bin/alcasar-mail-install.sh,/usr/local/bin/alcasar-mail-uninstall.sh            # Service mail commands to execute whith web server
+  - modifier cette ligne 
+ADMWEB  LAN_ORG=(root)  NOPASSWD: NET,SYSTEM_BACKUP,SQL,BL,NF,EXPORT,RADDB,LOGOUT,UAM,SERVICE,GAMMU,SSL,HTDIGEST,LOG_GEN,LDAP,IOT_CAPTURE,WIFI4EU,MAIL_SERVICE
+
+
+
