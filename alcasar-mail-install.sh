@@ -443,7 +443,7 @@ fi
 # on peut poser la question à l'admin s'il veut l'activer avant, dans ce cas le mettre avec la condition pour la WLD ci-dessous.
 # dès que le script d'envoi sera prêt, on décommente la ligne, depuis l'ACC on rajoute cette ligne directement dans le fichier depuis le php
 
-# echo "45 5 * * 1 root /usr/local/bin/alcasar-mail-archive.sh" >> /etc/cron.d/alcasar-archive
+# grep "alcasar-mail-archive" /etc/cron.d/alcasar-archive > /dev/null 2>&1 || echo "45 5 * * 1 root /usr/local/bin/alcasar-mail-archive.sh" >> /etc/cron.d/alcasar-archive
 
 
 # on peut appeler le script WLD en mode interactif, seulement si l'install est en mode interactif lui même,
